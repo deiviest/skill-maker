@@ -1,81 +1,167 @@
-# Claude Skill Creator Workflow
+# Claude Skill Creator
 
-An interactive workflow for building Claude skills following Anthropic's official best practices. Works in **Antigravity** (`.agent/`) and **Claude Code** (`.claude/`).
+An interactive, 8-phase workflow that guides you through building a production-ready Claude skill from scratch — with Python scripts for automated scaffolding and validation.
+
+Works with **Antigravity** and **Claude Code**.
 
 ---
 
-## What it does
+## Why this exists
 
-Guides you through the complete skill-building process in 8 structured phases:
+Building a Claude skill that reliably activates, follows the right structure, and passes all of Anthropic's technical requirements involves a lot of details. Get the `description` wrong and the skill never triggers. Get the folder name wrong and it won't upload. Miss a frontmatter delimiter and the whole thing breaks.
 
-1. **Discover** — 7 targeted questions to understand the use case, triggers, tools, and edge cases
-2. **Classify** — choose the right category (Document, Workflow, MCP) and design pattern
-3. **Write** — build `SKILL.md` with correct frontmatter, trigger phrases, steps, examples, and error handling
-4. **Scaffold** — generate the full folder structure automatically with `scaffold_skill.py`
-5. **Review** — show the complete `SKILL.md` to the user and apply feedback
-6. **Test** — generate triggering tests, functional tests, and a debug tip
-7. **Validate** — run `validate_skill.py` to check all 15 technical rules programmatically
-8. **Install** — exact steps to upload to Claude.ai or Claude Code
+This workflow encodes all of those rules into a guided process — asking the right questions, generating the files automatically, and validating everything with a script before you ever touch the upload button.
+
+---
+
+## How it works
+
+The workflow has **8 phases**:
+
+| Phase | What happens |
+|---|---|
+| **1 — Discover** | The agent asks 7 targeted questions: what the skill does, what phrases trigger it, what shouldn't trigger it, what tools it needs, the step-by-step process, what a good result looks like, and known failure cases |
+| **2 — Classify** | Determines the right category (Document & Asset Creation / Workflow Automation / MCP Enhancement) and design pattern (Sequential, Multi-MCP, Iterative, Context-Aware, Domain Intelligence) |
+| **3 — Write** | Builds `SKILL.md` with correct YAML frontmatter, trigger phrases, workflow steps, examples, error handling, and validation gates |
+| **4 — Scaffold** | Runs `scaffold_skill.py` to generate the full folder structure with a prefilled stub |
+| **5 — Review** | Shows the complete `SKILL.md` to the user and applies feedback before continuing |
+| **6 — Test** | Generates a testing plan: triggering tests (✅ should / ❌ should not), functional tests per use case, and a quick debug tip |
+| **7 — Validate** | Runs `validate_skill.py` to check all 15 technical rules programmatically. Must fully pass before proceeding |
+| **8 — Install** | Provides exact instructions for uploading to Claude.ai or placing in Claude Code |
 
 ---
 
 ## What's included
 
 ```
-.agent/workflows/          ← for Antigravity users
-├── create-skill.md        ← the workflow
+.agent/workflows/           ← Antigravity
+├── create-skill.md         ← the workflow (invoke with /create-skill)
 └── scripts/
-    ├── scaffold_skill.py  ← generates the skill folder structure
-    └── validate_skill.py  ← checks all 15 rules before upload
+    ├── scaffold_skill.py   ← generates the skill folder and SKILL.md stub
+    └── validate_skill.py   ← checks 15 technical rules before upload
 
-.claude/workflows/         ← for Claude Code users
-└── (same structure)
+.claude/workflows/          ← Claude Code (same content)
+└── ...
 ```
-
----
-
-## Usage
-
-### In Antigravity
-
-Type `/create-skill` in your Antigravity chat.
-
-### In Claude Code
-
-Type `/create-skill` or ask: *"Use the create-skill workflow to help me build a skill for [your use case]"*
 
 ---
 
 ## Python scripts
 
-Both scripts require **Python 3.10+** and no external dependencies.
+Both scripts require **Python 3.10+** with no external dependencies.
 
-### `scaffold_skill.py`
-
-Generates a skill folder with a prefilled `SKILL.md` stub:
+### `scaffold_skill.py` — Generate the skill structure
 
 ```bash
 python .agent/workflows/scripts/scaffold_skill.py \
   --name my-skill \
   --author "Your Name" \
   --category "productivity" \
-  --scripts --references \
+  --scripts \
+  --references \
   --output ./skills
 ```
 
-### `validate_skill.py`
+**Flags:**
 
-Checks all 15 technical rules and exits with code `1` if any fail:
+- `--name` — skill name in kebab-case *(required)*
+- `--author` — author name for metadata
+- `--category` — skill category
+- `--scripts` — include a `scripts/` directory
+- `--references` — include a `references/` directory
+- `--assets` — include an `assets/` directory
+- `--output` — parent directory for the generated folder
+- `--dry-run` — preview the structure without creating any files
+
+**Output:**
+
+```
+skills/my-skill/
+├── SKILL.md        ← prefilled stub with frontmatter
+├── scripts/
+└── references/
+```
+
+---
+
+### `validate_skill.py` — Check all rules before upload
 
 ```bash
 python .agent/workflows/scripts/validate_skill.py ./skills/my-skill/
 ```
 
-Checks include: exact `SKILL.md` casing · kebab-case folder name · frontmatter delimiters · `name` matches folder · no reserved keywords · description ≤ 1024 chars · no XML angle brackets · trigger signal present · word count ≤ 5000
+Exits with code `0` if all checks pass, `1` if any fail.
+
+**15 checks it runs:**
+
+| Check | Rule |
+|---|---|
+| `SKILL.md` exists (exact case) | File naming requirement |
+| No `README.md` inside folder | Forbidden file |
+| Folder name is kebab-case | Naming convention |
+| Frontmatter has `---` delimiters | YAML requirement |
+| `name` field is kebab-case | Naming convention |
+| `name` matches folder name | Consistency |
+| `name` has no reserved keywords | "claude", "anthropic" are reserved |
+| `description` field is present | Required field |
+| `description` ≤ 1024 characters | Length limit |
+| `description` has no XML tags | Security restriction |
+| `description` contains trigger signal | Quality requirement |
+| No XML tags anywhere in the file | Security restriction |
+| Word count ≤ 5000 | Size limit |
+
+**Example output:**
+
+```
+Skill Validation Report — my-skill
+───────────────────────────────────────────────────────
+✅  SKILL.md found (exact case)
+✅  No README.md inside skill folder
+✅  Folder name is kebab-case: my-skill
+✅  YAML frontmatter has --- delimiters
+✅  name is valid kebab-case: my-skill
+✅  name field matches folder name (my-skill == my-skill)
+✅  name contains no reserved keywords (claude, anthropic)
+✅  description field is present
+✅  description length: 198 chars (limit: 1024)
+✅  description contains no XML angle brackets < >
+✅  description contains trigger signal ('Use when', 'Use for', etc.)
+✅  No XML angle brackets < > in SKILL.md body
+✅  Word count: 412 words (limit: 5000)
+───────────────────────────────────────────────────────
+
+✅  All 13 checks passed. Skill is ready for upload.
+```
 
 ---
 
-## Skills documentation
+## Using the workflow
 
-- [Anthropic Skills Guide](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
+### Antigravity
+
+Type `/create-skill` in your chat.
+
+### Claude Code
+
+Ask: *"Use the create-skill workflow to help me build a skill for [your use case]"*
+
+---
+
+## Installing a finished skill
+
+**Claude.ai:**
+
+1. Compress the skill folder into a `.zip`
+2. Go to `Settings > Capabilities > Skills` → **Upload skill**
+3. Enable with the toggle
+
+**Claude Code:**
+Place the skill folder in Claude Code's skills directory.
+
+---
+
+## Resources
+
+- [Anthropic — The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
 - [Anthropic Skills Repository](https://github.com/anthropics/skills)
+- [Skills API Documentation](https://docs.anthropic.com/en/docs/agents-and-tools/skills)
