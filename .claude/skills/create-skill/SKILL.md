@@ -11,7 +11,18 @@ Helper scripts in `.agent/workflows/scripts/`:
 
 ---
 
-## PHASE 1 — Understand the Use Case
+## Entry Point — Choose Your Starting Mode
+
+Before starting, ask the user:
+
+> "Should I start from scratch and guide you through all the questions, or should I analyze our conversation and propose answers based on what we've already been working on?"
+
+- **Mode A — From Scratch:** ask all 7 questions one by one *(default when no prior context)*
+- **Mode B — From Context:** infer answers from the conversation, present a proposal, then continue
+
+---
+
+## PHASE 1A — From Scratch (Mode A)
 
 Ask the following questions **one at a time**. Wait for each answer before moving to the next. Offer examples if the user is unsure.
 
@@ -46,6 +57,37 @@ Ask the following questions **one at a time**. Wait for each answer before movin
 **Q7 — Are there known errors or edge cases?**
 > "What could go wrong? Are there special cases the skill should handle differently?"
 *Goal: prepare the Troubleshooting section and error handling logic.*
+
+---
+
+## PHASE 1B — From Context (Mode B)
+
+Scan the full conversation history and infer the best possible answer for each of the 7 Phase 1 questions. Then present a single structured proposal — do **not** ask questions one by one. Present everything at once and ask for one confirmation pass.
+
+**Format your proposal exactly like this:**
+
+---
+**Proposed skill definition — based on our conversation**
+
+- **Q1 — What it does:** [inferred task and domain]
+- **Q2 — Trigger phrases:** [3–5 phrases extracted from how the user has been asking for this work]
+- **Q3 — Should NOT trigger:** [out-of-scope cases discussed, or "None identified"]
+- **Q4 — Tools needed:** [built-in Claude / MCP server name and tool names if detected]
+- **Q5 — Step-by-step process:** [extracted from the workflow built or discussed]
+- **Q6 — Success criteria:** [what a good result looks like, based on outputs produced]
+- **Q7 — Edge cases / errors:** [issues or exceptions encountered during the conversation]
+
+*Does this look right? Correct anything that's off — then we'll continue to Phase 2.*
+
+---
+
+**Inference rules:**
+
+- Draw from the entire conversation: user messages, tasks completed, outputs produced, errors encountered.
+- If an answer cannot be confidently inferred, mark it `[Unknown — please clarify]` and ask only for those gaps.
+- **Trigger phrases (Q2) are the most critical** — if you cannot identify at least 3 confidently, ask for them explicitly before continuing.
+- If MCP tools were used during the conversation, list their exact names as seen in the tool calls — do not guess.
+- Once the user confirms or corrects the proposal, treat those answers as final and proceed to Phase 2 without re-asking anything.
 
 ---
 

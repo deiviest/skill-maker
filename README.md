@@ -34,14 +34,17 @@ The workflow has **8 phases**:
 ## What's included
 
 ```
-.agent/workflows/           ← Antigravity
-├── create-skill.md         ← the workflow (invoke with /create-skill)
+.agent/workflows/              ← Antigravity
+├── create-skill.md            ← the workflow (invoke with /create-skill)
 └── scripts/
-    ├── scaffold_skill.py   ← generates the skill folder and SKILL.md stub
-    └── validate_skill.py   ← checks 15 technical rules before upload
+    ├── scaffold_skill.py      ← generates the skill folder and SKILL.md stub
+    └── validate_skill.py      ← checks 15 technical rules before upload
 
-.claude/workflows/          ← Claude Code (same content)
-└── ...
+.claude/skills/create-skill/   ← Claude Code (official structure per Anthropic docs)
+├── SKILL.md                   ← same content, invoked as /create-skill
+└── scripts/
+    ├── scaffold_skill.py
+    └── validate_skill.py
 ```
 
 ---
