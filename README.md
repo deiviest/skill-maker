@@ -145,13 +145,27 @@ Skill Validation Report — my-skill
 
 ## Using the workflow
 
-### Antigravity
+You can trigger the workflow in two different modes depending on your situation:
 
-Type `/create-skill` in your chat.
+### Mode A: From Scratch
 
-### Claude Code
+Best when you have a general idea but need guidance structuring it. The agent will ask you 7 targeted questions one by one.
 
-Ask: *"Use the create-skill workflow to help me build a skill for [your use case]"*
+**Antigravity:**
+> "I want to create a new skill. Let's use the `/create-skill` workflow."
+
+**Claude Code:**
+> "Use the create-skill workflow to help me build a skill from scratch."
+
+### Mode B: From Context
+
+Best when you've already been working on a complex task with the agent and want to extract that exact process into a repeatable skill. The agent will analyze your conversation history and propose a complete skill definition at once.
+
+**Antigravity:**
+> "We finally got this script working perfectly. Run `/create-skill` and build a skill based on what we just did."
+
+**Claude Code:**
+> "Now that we've solved this, use the create-skill workflow to turn our solution into a skill. Extract the steps from our conversation history."
 
 ---
 
