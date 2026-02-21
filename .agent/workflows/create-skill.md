@@ -1,4 +1,4 @@
----
+﻿---
 description: Interactive guide to create a Claude skill. Asks targeted questions, builds a valid SKILL.md with correct frontmatter, scaffolds the folder structure, and validates with Python scripts.
 ---
 
@@ -15,7 +15,7 @@ Helper scripts in `.agent/workflows/scripts/`:
 
 Before starting, ask the user:
 
-> "Should I start from scratch and guide you through all the questions, or should I analyze our conversation and propose answers based on what we've already been working on?"
+> "Should I start from scratch with all 7 questions, or analyze our conversation and propose answers based on what we've already built?"
 
 - **Mode A — From Scratch:** ask all 7 questions one by one *(default when no prior context)*
 - **Mode B — From Context:** infer answers from the conversation, present a proposal, then continue
@@ -24,19 +24,16 @@ Before starting, ask the user:
 
 ## PHASE 1A — From Scratch (Mode A)
 
-Ask the following questions **one at a time**. Wait for each answer before moving to the next. Offer examples if the user is unsure.
+Ask **one question at a time**, wait for the answer, offer examples if the user is unsure.
 
 **Q1 — What problem does it solve?**
 > "What task do you want Claude to handle with this skill? Describe it in one sentence."
-*Goal: understand the desired output and the skill's domain.*
-
 **Q2 — When should it activate?**
 > "What phrases would a user type to request this? Give me 3–5 real examples that should trigger the skill."
 *Goal: extract trigger phrases for the `description` field — the most important part of the skill.*
 
 **Q3 — What should NOT trigger it?**
 > "Are there similar queries that should NOT activate this skill? Is there another skill covering a related case?"
-*Goal: define negative triggers to prevent overtriggering. Skip if no overlap risk.*
 
 **Q4 — What tools does it need?**
 > "Does the skill need MCP servers, or only Claude's built-in capabilities (read, write, reason, code)?"
@@ -44,25 +41,25 @@ Ask the following questions **one at a time**. Wait for each answer before movin
 - Built-in Claude only → Category 1 or 2
 - External services via MCP (Notion, Linear, Slack…) → Category 2 or 3
 
-*If MCP: ask for the exact server name and tool names before writing the SKILL.md — they are case-sensitive and a wrong name breaks the skill silently.*
+*If MCP: confirm exact server name and tool names before writing any file (case-sensitive — wrong names break the skill silently).*
 
 **Q5 — What is the step-by-step process?**
 > "Walk me through how this task would be done manually. List the steps, even if rough."
-*Goal: extract the workflow that goes into the SKILL.md body.*
+
 
 **Q6 — What does a good result look like?**
 > "How would you know the skill did its job correctly? What exactly should it produce?"
-*Goal: define quality criteria and output examples to embed in the instructions.*
+
 
 **Q7 — Are there known errors or edge cases?**
 > "What could go wrong? Are there special cases the skill should handle differently?"
-*Goal: prepare the Troubleshooting section and error handling logic.*
+
 
 ---
 
 ## PHASE 1B — From Context (Mode B)
 
-Scan the full conversation history and infer the best possible answer for each of the 7 Phase 1 questions. Then present a single structured proposal — do **not** ask questions one by one. Present everything at once and ask for one confirmation pass.
+Scan the full conversation history and infer answers for all 7 Phase 1 questions. Present a **single structured proposal** and ask for one confirmation pass — do not ask questions one by one.
 
 **Format your proposal exactly like this:**
 
@@ -81,13 +78,7 @@ Scan the full conversation history and infer the best possible answer for each o
 
 ---
 
-**Inference rules:**
-
-- Draw from the entire conversation: user messages, tasks completed, outputs produced, errors encountered.
-- If an answer cannot be confidently inferred, mark it `[Unknown — please clarify]` and ask only for those gaps.
-- **Trigger phrases (Q2) are the most critical** — if you cannot identify at least 3 confidently, ask for them explicitly before continuing.
-- If MCP tools were used during the conversation, list their exact names as seen in the tool calls — do not guess.
-- Once the user confirms or corrects the proposal, treat those answers as final and proceed to Phase 2 without re-asking anything.
+**Inference rules:** draw from user messages, tasks completed, outputs, and errors. Mark `[Unknown — please clarify]` for anything uncertain. **Q2 trigger phrases are critical** — ask explicitly if fewer than 3 can be confidently inferred. Use exact MCP tool names from tool calls. Once user confirms, proceed to Phase 2 without re-asking.
 
 ---
 
@@ -132,6 +123,8 @@ Briefly explain to the user which category and pattern you chose and why. **If u
 ---
 name: skill-name-in-kebab-case
 description: [WHAT it does] + [WHEN to use it — specific trigger phrases] + [key capabilities]. Max 1024 chars. No XML tags.
+# license: MIT                    # include if open-sourcing
+# compatibility: Requires MCP server X connected  # 1-500 chars, env requirements
 # allowed-tools: "Bash(python:*) WebFetch"  # only if restricting tools
 metadata:
   author: [name]
@@ -242,6 +235,10 @@ Apply all requested changes. For each `references/` file, create a structured Ma
 
 ## PHASE 6 — Testing Plan
 
+### Success Criteria (define before testing)
+
+Per the Anthropic guide — share 1-2 of these with the user before testing: **triggering** (90%+ relevant queries activate the skill), **efficiency** (fewer tool calls and tokens than without the skill), **reliability** (no mid-workflow redirects needed), **consistency** (same request, same structure across sessions).
+
 ### Triggering Tests
 
 List queries that SHOULD trigger the skill (min. 5, including paraphrases):
@@ -303,3 +300,5 @@ Place `skill-name/` in Claude Code's skills directory and restart if needed.
 - **Always show the full SKILL.md** and get explicit user confirmation before moving on.
 - If the skill uses MCPs, collect the exact server name and tool names during Q4 (Phase 1), before writing any file. Wrong tool names break the skill silently with no error message.
 - **Always run `validate_skill.py`.** Trust the script over manual review.
+- **Pro tip from Anthropic:** The most effective skill builders iterate on a single challenging task until Claude succeeds in conversation, then extract that winning approach into the skill. This gives faster signal than building broadly from scratch.
+- **Skills are living documents.** After the user installs the skill and encounters edge cases, encourage them to return and re-run this workflow with those examples to improve the skill iteratively.

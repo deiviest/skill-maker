@@ -4,7 +4,10 @@ description: Interactive guide to create a Claude skill. Asks targeted questions
 
 # Workflow: Create a Claude Skill
 
-Helper scripts in `.agent/workflows/scripts/`:
+Helper scripts (same content, two locations):
+
+- **Antigravity:** `.agent/workflows/scripts/`
+- **Claude Code:** `.claude/skills/create-skill/scripts/`
 
 - **`scaffold_skill.py`** — generates the folder structure and a prefilled `SKILL.md` stub.
 - **`validate_skill.py`** — runs all 15 technical checks and reports errors before upload.
@@ -132,6 +135,8 @@ Briefly explain to the user which category and pattern you chose and why. **If u
 ---
 name: skill-name-in-kebab-case
 description: [WHAT it does] + [WHEN to use it — specific trigger phrases] + [key capabilities]. Max 1024 chars. No XML tags.
+# license: MIT                    # include if open-sourcing
+# compatibility: Requires MCP server X connected  # 1-500 chars, env requirements
 # allowed-tools: "Bash(python:*) WebFetch"  # only if restricting tools
 metadata:
   author: [name]
@@ -242,6 +247,10 @@ Apply all requested changes. For each `references/` file, create a structured Ma
 
 ## PHASE 6 — Testing Plan
 
+### Success Criteria (define before testing)
+
+Per the Anthropic guide — share 1-2 of these with the user before testing: **triggering** (90%+ relevant queries activate the skill), **efficiency** (fewer tool calls and tokens than without the skill), **reliability** (no mid-workflow redirects needed), **consistency** (same request, same structure across sessions).
+
 ### Triggering Tests
 
 List queries that SHOULD trigger the skill (min. 5, including paraphrases):
@@ -303,3 +312,5 @@ Place `skill-name/` in Claude Code's skills directory and restart if needed.
 - **Always show the full SKILL.md** and get explicit user confirmation before moving on.
 - If the skill uses MCPs, collect the exact server name and tool names during Q4 (Phase 1), before writing any file. Wrong tool names break the skill silently with no error message.
 - **Always run `validate_skill.py`.** Trust the script over manual review.
+- **Pro tip from Anthropic:** The most effective skill builders iterate on a single challenging task until Claude succeeds in conversation, then extract that winning approach into the skill. This gives faster signal than building broadly from scratch.
+- **Skills are living documents.** After the user installs the skill and encounters edge cases, encourage them to return and re-run this workflow with those examples to improve the skill iteratively.

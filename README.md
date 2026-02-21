@@ -1,6 +1,9 @@
 # Claude Skill Creator
 
-An interactive, 8-phase workflow that guides you through building a production-ready Claude skill from scratch — with Python scripts for automated scaffolding and validation.
+> **Built on Anthropic's official guide.**
+> Every phase, question, rule, and validation check in this workflow traces directly back to **[The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)** — Anthropic's own PDF. Nothing is invented; everything is sourced.
+
+An interactive, 8-phase workflow that guides you through building a production-ready Claude skill — with Python scripts for automated scaffolding and validation.
 
 Works with **Antigravity** and **Claude Code**.
 
@@ -8,9 +11,9 @@ Works with **Antigravity** and **Claude Code**.
 
 ## Why this exists
 
-Building a Claude skill that reliably activates, follows the right structure, and passes all of Anthropic's technical requirements involves a lot of details. Get the `description` wrong and the skill never triggers. Get the folder name wrong and it won't upload. Miss a frontmatter delimiter and the whole thing breaks.
+Anthropic's guide is comprehensive, but reading it and then building a skill correctly from scratch still requires discipline and attention to detail. Get the `description` wrong and the skill never activates. Get the folder name wrong and it won't upload. Miss a frontmatter delimiter and the whole thing breaks.
 
-This workflow encodes all of those rules into a guided process — asking the right questions, generating the files automatically, and validating everything with a script before you ever touch the upload button.
+This workflow encodes the guide's rules into a structured, interactive process — asking the right questions, generating the files automatically, and validating everything with a script that checks every rule from the official checklist before you ever touch the upload button.
 
 ---
 
@@ -99,10 +102,12 @@ Exits with code `0` if all checks pass, `1` if any fail.
 
 | Check | Rule |
 |---|---|
+| Skill directory exists | Path validation |
 | `SKILL.md` exists (exact case) | File naming requirement |
 | No `README.md` inside folder | Forbidden file |
 | Folder name is kebab-case | Naming convention |
 | Frontmatter has `---` delimiters | YAML requirement |
+| `name` field is present | Required field |
 | `name` field is kebab-case | Naming convention |
 | `name` matches folder name | Consistency |
 | `name` has no reserved keywords | "claude", "anthropic" are reserved |
@@ -133,7 +138,7 @@ Skill Validation Report — my-skill
 ✅  Word count: 412 words (limit: 5000)
 ───────────────────────────────────────────────────────
 
-✅  All 13 checks passed. Skill is ready for upload.
+✅  All 15 checks passed. Skill is ready for upload.
 ```
 
 ---
